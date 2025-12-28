@@ -1,8 +1,24 @@
 package utils
 
-import "os/exec"
+import (
+	"os/exec"
+	"strings"
+)
 
 func CommandExists(cmd string) bool {
 	_, err := exec.LookPath(cmd)
 	return err == nil
+}
+
+func IsServiceActive(name string, userService bool) bool {
+	if !CommandExists("systemctl") {
+		return false
+	}
+
+	args := []string{"is-active", name}
+	if userService {
+		args = []string{"--user", "is-active", name}
+	}
+	output, _ := exec.Command("systemctl", args...).Output()
+	return strings.TrimSpace(string(output)) == "active"
 }
